@@ -1,6 +1,6 @@
 # Security Policy
 
-> Public version of this policy: https://isaacadjei.me/security-policy
+> The public version of this policy is at [isaacadjei.me/security-policy](https://isaacadjei.me/security-policy).
 
 This repository is public. It holds my GitHub profile README, the generator that
 builds it and the SVGs it produces. The generator reads GitHub statistics with
