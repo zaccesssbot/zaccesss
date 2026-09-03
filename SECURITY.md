@@ -4,7 +4,7 @@
 
 This repository is public. It holds my GitHub profile README, the generator that
 builds it and the SVGs it produces. The generator reads GitHub statistics with
-read only tokens, so it can never change anything.
+read-only tokens, so it can never change anything.
 
 ## Reporting a vulnerability
 
@@ -17,7 +17,7 @@ Please report anything security relevant privately, not in a public issue.
 
 - No secret value is ever committed to this repository. Every credential exists
   solely as a GitHub Actions secret.
-- `ACCESS_TOKEN` is a fine grained token scoped to read only, covering the account
+- `ACCESS_TOKEN` is a fine grained token scoped to read-only access, covering the account
   and repository statistics the generator needs. It cannot write to any repository.
 - `CONTRIB_TOKEN` is a classic personal access token scoped to `read:user` alone,
   with no `repo` access at all. GitHub's `contributionsCollection` API withholds
@@ -39,7 +39,7 @@ the new token.
 1. Revoke the exposed token. `ACCESS_TOKEN` is a fine grained token, revoked from
    GitHub's fine grained token settings; `CONTRIB_TOKEN` is a classic token,
    revoked from GitHub's classic token settings.
-2. Generate a replacement with the same minimal scope: read only covering account
+2. Generate a replacement with the same minimal scope: read-only access covering account
    and repository statistics for `ACCESS_TOKEN`, `read:user` alone for
    `CONTRIB_TOKEN`.
 3. Update the matching Actions secret (`ACCESS_TOKEN` or `CONTRIB_TOKEN`).
