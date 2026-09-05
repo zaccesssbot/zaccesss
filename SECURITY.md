@@ -25,9 +25,9 @@ Please report anything security relevant privately, not in a public issue.
   every caller, even the account owner, unless the token carries that classic
   scope; no fine-grained permission grants it. This is the one deliberate
   exception to using fine-grained tokens only, held as narrowly as the gap allows: it
-  cannot read or write any repository content, only my own profile level
+  cannot read or write any repository content, only my own profile-level
   contribution counts.
-- The workflow's write access to this repo comes from the built in `GITHUB_TOKEN`,
+- The workflow's write access to this repo comes from the built-in `GITHUB_TOKEN`,
   scoped to this repository alone and is only used to commit the regenerated SVGs.
 
 ## If a credential is exposed
