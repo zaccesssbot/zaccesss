@@ -5,7 +5,7 @@
 # this generator script is licensed under the PolyForm Noncommercial License 1.0.0;
 # see NOTICE.md.
 """
-palettes.py - every colour set the profile card and the approach panel can use.
+palettes.py: every colour set the profile card and the approach panel can use.
 
 ACTIVE picks the live one, which profile.py beside it reads. The live card stays on
 Primer; every other set is kept here switched off, ready to try by changing ACTIVE.
