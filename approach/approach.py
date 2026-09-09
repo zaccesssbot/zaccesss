@@ -6,7 +6,7 @@
 # see NOTICE.md. The repository's visual output (the SVGs, the README and the
 # assets) is licensed under CC BY-NC-ND 4.0; see LICENSE.
 """
-approach.py - derives approach-dark.svg and approach-light.svg
+approach.py: derives approach-dark.svg and approach-light.svg
 from approach.svg.
 
 approach.svg (checked in, hand-edited) is the single theme-adaptive source: a
