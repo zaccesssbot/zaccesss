@@ -32,7 +32,7 @@ body:
     id: notes
     attributes:
       label: Notes
-      description: Anything extra - links, related issues, edge cases to watch for.
+      description: Anything extra, such as links, related issues or edge cases to watch for.
     validations:
       required: false
   - type: dropdown
