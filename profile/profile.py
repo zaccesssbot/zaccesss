@@ -6,7 +6,7 @@
 # see NOTICE.md. The repository's visual output (the SVGs, the README and the
 # assets) is licensed under CC BY-NC-ND 4.0; see LICENSE.
 """
-profile.py - my GitHub profile README SVG generator.
+profile.py: my GitHub profile README SVG generator.
 
 I generate three SVG cards (profile.svg, profile-dark.svg and profile-light.svg):
   - profile.svg: theme-adaptive card (dark palette by default, light under prefers-color-scheme)
