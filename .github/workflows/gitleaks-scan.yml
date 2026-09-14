@@ -1,5 +1,5 @@
 # scan this repository for hard-coded secrets and credentials on every PR targeting
-# main and every push. The build only uses a read only token, but a
+# main and every push. The build only uses a read-only token, but a
 # tripwire still fails loudly if any credential ever gets committed by mistake. It
 # installs a pinned gitleaks binary directly rather than the action wrapper, which needs
 # a paid licence for SARIF upload on private repos.

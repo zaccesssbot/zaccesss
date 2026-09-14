@@ -82,7 +82,7 @@ jobs:
         run: python profile/profile.py
 
       # derive approach-dark.svg and approach-light.svg from the hand-edited approach.svg.
-      # no secrets needed - it's a pure palette split of a checked-in source file.
+      # no secrets needed: it's a pure palette split of a checked-in source file.
       - name: Generate the approach SVG variants
         run: python approach/approach.py
 
