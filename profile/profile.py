@@ -552,7 +552,7 @@ def dual_row_detail(y: int, lbl1: str, v1: str, lbl2: str, v2_main: str, detail_
     closing braces with those other rows: both the outer dot-leader (before v2_main) and the
     inner one (inside the braces) stretch to land '{' on that column, so '}' lands in sync too
     since every row is still exactly LINE_WIDTH chars wide. brace_col is clamped to this row's
-    own safe range first, so it can only ever pad up to what the LINE_WIDTH budget allows - it can
+    own safe range first, so it can only ever pad up to what the LINE_WIDTH budget allows, so it can
     never push a row past it.
     """
     p_min, p_max = brace_col_range(lbl2, v2_main, detail_lbl, detail_val)
