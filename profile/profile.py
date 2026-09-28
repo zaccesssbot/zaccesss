@@ -496,7 +496,7 @@ def info_row(y: int, label: str, value: str) -> str:
 
 def section_header(y: int, title: str) -> str:
     # section headers match the weight of the first "isaac@adjei" line,
-    # so the whole thing - title and hyphens - uses the main text colour, no grey.
+    # so the whole thing (title and hyphens) uses the main text colour, no grey.
     hyphens = '-' * max(2, LINE_WIDTH - 2 - len(title) - 1)
     return trow(y, f'- {title} {hyphens}')
 

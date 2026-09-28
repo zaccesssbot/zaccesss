@@ -13,7 +13,7 @@ approach.svg (checked in, hand-edited) is the single theme-adaptive source: a
 dark base palette plus a `@media (prefers-color-scheme: light)` override. This
 script splits that into two fixed-palette siblings for the README's <picture>
 element, the same reason profile.py emits profile-dark.svg / profile-light.svg
-alongside profile.svg - some forges and devices don't honour @media queries
+alongside profile.svg, since some forges and devices don't honour @media queries
 inside an <img>-embedded SVG, so those need a fixed file per theme.
 
 Run after editing approach.svg's markup or palette:
