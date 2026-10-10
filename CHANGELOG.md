@@ -6,6 +6,13 @@ because it is a living profile rather than a released library.
 
 ## Unreleased
 
+## 2026-10-11
+
+### Fixed
+
+- Lines of code leave out two generated repos: isaacadjei.me (the public copy of my portfolio's source) and meta-mirror (automated backups). Each portfolio release copied the whole site into isaacadjei.me, so the same lines were counted twice.
+- The card images carry a new cache number (16) so GitHub shows the corrected figures straight away instead of a stale copy.
+
 ## 2026-10-09
 
 ### Fixed

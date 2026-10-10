@@ -31,9 +31,9 @@
   - profile/profile.svg serves as the standalone adaptive fallback card (dark theme by default with embedded CSS).
 -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="profile/profile-dark.svg?v=15">
-  <source media="(prefers-color-scheme: light)" srcset="profile/profile-light.svg?v=15">
-  <img alt="Isaac Adjei's GitHub Profile" src="profile/profile.svg?v=15" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="profile/profile-dark.svg?v=16">
+  <source media="(prefers-color-scheme: light)" srcset="profile/profile-light.svg?v=16">
+  <img alt="Isaac Adjei's GitHub Profile" src="profile/profile.svg?v=16" width="100%">
 </picture>
 <!-- I'm keeping this SVG but muting it for now - I'll uncomment when i want to restore it later -->
 <!--

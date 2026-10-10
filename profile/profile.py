@@ -284,6 +284,12 @@ def get_all_contributions(token: str, username: str, creation_year: int) -> tupl
     return commits, reviews, total_contribs
 
 
+# repos left out of the lines of code: isaacadjei.me is a generated public copy of the portfolio's
+# source, rebuilt on every release, so counting it would count the same lines twice. meta-mirror holds
+# automated metadata backups rather than code anyone wrote
+LOC_EXCLUDE_REPOS = {'zaccesss/isaacadjei.me', 'zaccesss/meta-mirror'}
+
+
 def get_loc(token: str, username: str) -> tuple[int, int, int]:
     """
     Total LOC across all owned non-forked repos.
@@ -332,6 +338,8 @@ def get_loc(token: str, username: str) -> tuple[int, int, int]:
         }"""
     add, delete = 0, 0
     for repo in repos:
+        if repo.lower() in LOC_EXCLUDE_REPOS:
+            continue
         owner, name = repo.split('/', 1)
         # only in the owner's own repos are unlinked terminal commits credited (they're the owner's).
         # in org/shared repos an unlinked commit could be someone else's, so there
