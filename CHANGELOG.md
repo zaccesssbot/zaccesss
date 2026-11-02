@@ -6,6 +6,10 @@ because it is a living profile rather than a released library.
 
 ## Unreleased
 
+### Changed
+
+- Community files follow the [AI policy](https://github.com/zaccesss/ai-policy): pull requests declare AI use and issue forms ask whether AI helped. Security reports go to security@isaacadjei.me.
+
 ### Added
 
 - `profile/palettes.py` keeps every colour set the card can use in one place: Primer (live) plus a suggested set with a stronger green and red for the lines of code `++` and `--` in bold. It also holds vivid and bold sets plus four sets from the Zacess themes. Only `ACTIVE` is rendered, so the card looks exactly as before; switching to another set is a one-word change.

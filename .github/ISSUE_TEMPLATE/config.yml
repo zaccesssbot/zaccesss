@@ -10,3 +10,6 @@ contact_links:
   - name: Prefer the website?
     url: https://isaacadjei.me/contact
     about: Reach me through my contact page instead.
+  - name: AI policy
+    url: https://github.com/zaccesss/ai-policy
+    about: How AI may and may not be used in issues and pull requests here.

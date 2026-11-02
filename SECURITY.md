@@ -10,7 +10,7 @@ read only tokens, so it can never change anything.
 
 Please report anything security relevant privately, not in a public issue.
 
-- Email contact@isaacadjei.me with the details and steps to reproduce.
+- Email security@isaacadjei.me with the details and steps to reproduce.
 - Expect an acknowledgement within a few days.
 
 ## What lives here and what does not
