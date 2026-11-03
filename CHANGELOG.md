@@ -24,7 +24,7 @@ because it is a living profile rather than a released library.
 ### Added
 
 - `profile/last-good.json` holds the last good value of every stat group (user, repos, contributions, lines of code, streak) with a timestamp, seeded from the 3 November cards so the first run after this change already has a fallback.
-- `profile/test_profile.py` checks the retry, the carry-over and the no-fallback exit with the API stubbed; CI runs it. `requirements-dev.txt` adds pytest for CI and local runs.
+- `tests/test_profile.py` checks the retry, the carry-over and the no-fallback exit with the API stubbed; CI runs it. `requirements-dev.txt` adds pytest for CI and local runs.
 
 - `profile/palettes.py` keeps every colour set the card can use in one place: Primer (live) plus a suggested set with a stronger green and red for the lines of code `++` and `--` in bold. It also holds vivid and bold sets plus four sets from the Zacess themes. Only `ACTIVE` is rendered, so the card looks exactly as before; switching to another set is a one-word change.
 

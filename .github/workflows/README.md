@@ -15,7 +15,7 @@ and the build workflow is a thin wrapper that hands them the credentials.
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| [ci](ci.yml) | PR | Compile-checks and imports both generators and runs `profile/test_profile.py` against a stubbed API so a broken change cannot land |
+| [ci](ci.yml) | PR | Compile-checks and imports both generators and runs `tests/test_profile.py` against a stubbed API so a broken change cannot land |
 | [gitleaks-scan](gitleaks-scan.yml) | push, PR | Scans for hard-coded secrets with a pinned gitleaks binary |
 | [markdownlint](markdownlint.yml) | push, PR | Lints every markdown file against [`.markdownlint.json`](../../.markdownlint.json) |
 

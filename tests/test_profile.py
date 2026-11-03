@@ -12,12 +12,13 @@ import pytest
 import requests
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+GENERATOR_DIR = os.path.join(os.path.dirname(HERE), 'profile')
 
 
 def load_generator():
     # loaded by path under its own name because the stdlib also has a module called profile
-    sys.path.insert(0, HERE)  # palettes.py lives beside the generator
-    spec = importlib.util.spec_from_file_location('profile_card', os.path.join(HERE, 'profile.py'))
+    sys.path.insert(0, GENERATOR_DIR)  # palettes.py lives beside the generator
+    spec = importlib.util.spec_from_file_location('profile_card', os.path.join(GENERATOR_DIR, 'profile.py'))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
