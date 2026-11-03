@@ -6,6 +6,8 @@ because it is a living profile rather than a released library.
 
 ## Unreleased
 
+## 2026-11-03
+
 ### Changed
 
 - Community files follow the [AI policy](https://github.com/zaccesss/ai-policy): pull requests declare AI use and issue forms ask whether AI helped. Security reports go to security@isaacadjei.me.
