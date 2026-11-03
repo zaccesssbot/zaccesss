@@ -9,13 +9,13 @@ and the build workflow is a thin wrapper that hands them the credentials.
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| [build](build.yml) | four times a day (00:17, 06:17, 12:17, 18:17 UTC), push to main (excluding generated SVGs), manual `workflow_dispatch` | Runs `profile/profile.py` to regenerate the profile cards (`profile/profile.svg`, `profile/profile-dark.svg`, `profile/profile-light.svg`) from live GitHub stats, then `approach/approach.py` to split the hand-edited `approach/approach.svg` into `approach/approach-dark.svg` and `approach/approach-light.svg`, then commits only if something changed. Pushes over SSH with a write deploy key that bypasses the branch ruleset |
+| [build](build.yml) | four times a day (00:17, 06:17, 12:17, 18:17 UTC), push to main (excluding generated files), manual `workflow_dispatch` | Runs `profile/profile.py` to regenerate the profile cards (`profile/profile.svg`, `profile/profile-dark.svg`, `profile/profile-light.svg`) from live GitHub stats and record them in `profile/last-good.json`, then `approach/approach.py` to split the hand-edited `approach/approach.svg` into `approach/approach-dark.svg` and `approach/approach-light.svg`, then commits only if something changed. A stat the API will not give after three retries is carried over from `last-good.json`; a stat with no stored value fails the generate step, so nothing is committed. Pushes over SSH with a write deploy key that bypasses the branch ruleset |
 
 ## Repo automation
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| [ci](ci.yml) | PR | Compile-checks and imports both generators so a broken change cannot land |
+| [ci](ci.yml) | PR | Compile-checks and imports both generators and runs `profile/test_profile.py` against a stubbed API so a broken change cannot land |
 | [gitleaks-scan](gitleaks-scan.yml) | push, PR | Scans for hard-coded secrets with a pinned gitleaks binary |
 | [markdownlint](markdownlint.yml) | push, PR | Lints every markdown file against [`.markdownlint.json`](../../.markdownlint.json) |
 

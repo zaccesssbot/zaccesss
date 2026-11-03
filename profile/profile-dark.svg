@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <svg xmlns="http://www.w3.org/2000/svg"
      font-family="ConsolasFallback,Consolas,monospace"
-     width="1120px" height="730px"
+     width="1120px" height="750px"
      font-size="16px">
   <defs><style>
       @font-face {
@@ -19,40 +19,40 @@
       .cc       { fill: #616e7f;   }
       text, tspan { white-space: pre; }
       </style></defs>
-  <rect width="1120px" height="730px" class="bg" rx="15"/>
+  <rect width="1120px" height="750px" class="bg" rx="15"/>
   <!-- ASCII portrait: 13px so 44-char lines leave a gap before x=410 -->
   <text x="35" y="30" class="fg" font-size="13px"
         xml:space="preserve" style="white-space:pre;">
-    <tspan x="35" y="80">                                            </tspan>
-    <tspan x="35" y="100">              .W##*W::  |1ll*$#,            </tspan>
-    <tspan x="35" y="120">            g$M#gg@@@@*@@@@MgMM@@           </tspan>
-    <tspan x="35" y="140">         Wgg##$@@@@@@%W$@@@@@@$##@@         </tspan>
-    <tspan x="35" y="160">     $@@@@@$$@M$M#%#@g#g#g@@@@@@@MM@@@M     </tspan>
-    <tspan x="35" y="180">   %@@@M*l|;;11;;;;;WW;:,,;11W**%M@@@$@@@   </tspan>
-    <tspan x="35" y="200">   M@gW;..,:;:;::::,,,,:::::::::;|lW#M@g@,  </tspan>
-    <tspan x="35" y="220">  @%1:,WM:1|111::,,,,,,,,,,::11|1||111WM@%  </tspan>
-    <tspan x="35" y="240">.@%l|||,1|WWWl1::,.........,:1llll||||l#$@$ </tspan>
-    <tspan x="35" y="260">1|;*11llll|11:,,,..........,,;||llWllll%g#@:</tspan>
-    <tspan x="35" y="280">@W,#l,;111;:,.   ......     .,,:;:;|llW#g@, </tspan>
-    <tspan x="35" y="300"> M@.11,|l*###gggW|,..... ,:1*#g###%W|11|1;@ </tspan>
-    <tspan x="35" y="320">.M..1**WWW*|;lgMM#1:,,,:*%#%,  lWWW**|;;.@:.</tspan>
-    <tspan x="35" y="340">@,,*W*%gg%:|W|,*W#%:..;*W%$:l*%W%$g%*W||,g@#</tspan>
-    <tspan x="35" y="360">#,,W;11l%*.|$1 :l*l,,,;*1.;..W%:W%l|11|l:; ,</tspan>
-    <tspan x="35" y="380">,,,11;;:,,:,..,,:11,..,1|,.,,..:,,,:;11l::,,</tspan>
-    <tspan x="35" y="400"> .,.:11;:,...  ,;1,,..,:::. ..,,..,:;1|1.:1.</tspan>
-    <tspan x="35" y="420"> . l1;:,,....1|:.     ..,;.....,,:1:11,W#.  </tspan>
-    <tspan x="35" y="440">     ;1::,,...,|*g#1;;|Wll;... ..,:;;1,l    </tspan>
-    <tspan x="35" y="460">     ,11;:,     ,;,   ...        ..::,*     </tspan>
-    <tspan x="35" y="480">      |ll|;1|%*|;:,.   .,;1l1.,:;|||1l      </tspan>
-    <tspan x="35" y="500">       ::;;;. ;,         ,11,.:,:11|l;      </tspan>
-    <tspan x="35" y="520"> .ll#* |,;|l1;:;,         . :111|l*%W;####%1</tspan>
-    <tspan x="35" y="540">@@@@@@|Wl1|11;;11;::::;1;;;:;1l**l;;: @@@@@@</tspan>
-    <tspan x="35" y="560">@@@@@@;;|lW*l1,             ;**W1::::l@@@@@@</tspan>
-    <tspan x="35" y="580">@@@@@@;,..,:;;1||;:,...,:;1||:,.,1,..,@@@@@@</tspan>
-    <tspan x="35" y="600">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
-    <tspan x="35" y="620">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
-    <tspan x="35" y="640">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
-    <tspan x="35" y="660">                                            </tspan>
+    <tspan x="35" y="89">                                            </tspan>
+    <tspan x="35" y="109">              .W##*W::  |1ll*$#,            </tspan>
+    <tspan x="35" y="129">            g$M#gg@@@@*@@@@MgMM@@           </tspan>
+    <tspan x="35" y="149">         Wgg##$@@@@@@%W$@@@@@@$##@@         </tspan>
+    <tspan x="35" y="169">     $@@@@@$$@M$M#%#@g#g#g@@@@@@@MM@@@M     </tspan>
+    <tspan x="35" y="189">   %@@@M*l|;;11;;;;;WW;:,,;11W**%M@@@$@@@   </tspan>
+    <tspan x="35" y="209">   M@gW;..,:;:;::::,,,,:::::::::;|lW#M@g@,  </tspan>
+    <tspan x="35" y="229">  @%1:,WM:1|111::,,,,,,,,,,::11|1||111WM@%  </tspan>
+    <tspan x="35" y="249">.@%l|||,1|WWWl1::,.........,:1llll||||l#$@$ </tspan>
+    <tspan x="35" y="269">1|;*11llll|11:,,,..........,,;||llWllll%g#@:</tspan>
+    <tspan x="35" y="289">@W,#l,;111;:,.   ......     .,,:;:;|llW#g@, </tspan>
+    <tspan x="35" y="309"> M@.11,|l*###gggW|,..... ,:1*#g###%W|11|1;@ </tspan>
+    <tspan x="35" y="329">.M..1**WWW*|;lgMM#1:,,,:*%#%,  lWWW**|;;.@:.</tspan>
+    <tspan x="35" y="349">@,,*W*%gg%:|W|,*W#%:..;*W%$:l*%W%$g%*W||,g@#</tspan>
+    <tspan x="35" y="369">#,,W;11l%*.|$1 :l*l,,,;*1.;..W%:W%l|11|l:; ,</tspan>
+    <tspan x="35" y="389">,,,11;;:,,:,..,,:11,..,1|,.,,..:,,,:;11l::,,</tspan>
+    <tspan x="35" y="409"> .,.:11;:,...  ,;1,,..,:::. ..,,..,:;1|1.:1.</tspan>
+    <tspan x="35" y="429"> . l1;:,,....1|:.     ..,;.....,,:1:11,W#.  </tspan>
+    <tspan x="35" y="449">     ;1::,,...,|*g#1;;|Wll;... ..,:;;1,l    </tspan>
+    <tspan x="35" y="469">     ,11;:,     ,;,   ...        ..::,*     </tspan>
+    <tspan x="35" y="489">      |ll|;1|%*|;:,.   .,;1l1.,:;|||1l      </tspan>
+    <tspan x="35" y="509">       ::;;;. ;,         ,11,.:,:11|l;      </tspan>
+    <tspan x="35" y="529"> .ll#* |,;|l1;:;,         . :111|l*%W;####%1</tspan>
+    <tspan x="35" y="549">@@@@@@|Wl1|11;;11;::::;1;;;:;1l**l;;: @@@@@@</tspan>
+    <tspan x="35" y="569">@@@@@@;;|lW*l1,             ;**W1::::l@@@@@@</tspan>
+    <tspan x="35" y="589">@@@@@@;,..,:;;1||;:,...,:;1||:,.,1,..,@@@@@@</tspan>
+    <tspan x="35" y="609">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
+    <tspan x="35" y="629">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
+    <tspan x="35" y="649">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</tspan>
+    <tspan x="35" y="669">                                            </tspan>
   </text>
   <!-- Stats block -->
   <text x="410" y="30" class="fg" style="white-space:pre;">
@@ -77,7 +77,7 @@
     <tspan x="410" y="390"><tspan class="cc">. </tspan><tspan class="key">Hobbies.Status</tspan><tspan class="cc">: ............ </tspan><tspan class="value">rm -rf impostor_syndrome &amp;&amp; touch grass</tspan></tspan>
     <tspan x="410" y="410"></tspan>
     <tspan x="410" y="430">- Contact ------------------------------------------------------------</tspan>
-    <tspan x="410" y="450"><tspan class="cc">. </tspan><tspan class="key">Discord</tspan><tspan class="cc">: .................................................. </tspan><tspan class="value">zac.cess</tspan></tspan>
+    <tspan x="410" y="450"><tspan class="cc">. </tspan><tspan class="key">Discord</tspan><tspan class="cc">: .................................................. </tspan><tspan class="value">zaccesss</tspan></tspan>
     <tspan x="410" y="470"><tspan class="cc">. </tspan><tspan class="key">LinkedIn</tspan><tspan class="cc">: ............................................ </tspan><tspan class="value">in/isaacadjei</tspan></tspan>
     <tspan x="410" y="490"><tspan class="cc">. </tspan><tspan class="key">Portfolio</tspan><tspan class="cc">: ........................................... </tspan><tspan class="value">isaacadjei.me</tspan></tspan>
     <tspan x="410" y="510"><tspan class="cc">. </tspan><tspan class="key">Email.Main</tspan><tspan class="cc">: .................................... </tspan><tspan class="value">hello@isaacadjei.me</tspan></tspan>
@@ -85,10 +85,11 @@
     <tspan x="410" y="550"></tspan>
     <tspan x="410" y="570">- Git Stats ----------------------------------------------------------</tspan>
     <tspan x="410" y="590"><tspan class="cc">. </tspan><tspan class="key">Followers</tspan><tspan class="cc">: .................... </tspan><tspan class="value">25</tspan><tspan class="cc"> | </tspan><tspan class="key">Stars</tspan><tspan class="cc">: ..................... </tspan><tspan class="value">93</tspan></tspan>
-    <tspan x="410" y="610"><tspan class="cc">. </tspan><tspan class="key">Commits</tspan><tspan class="cc">: ................... </tspan><tspan class="value">3,537</tspan><tspan class="cc"> | </tspan><tspan class="key">PRs</tspan><tspan class="cc">: .................... </tspan><tspan class="value">2,197</tspan></tspan>
-    <tspan x="410" y="630"><tspan class="cc">. </tspan><tspan class="key">Issues</tspan><tspan class="cc">: .................... </tspan><tspan class="value">1,708</tspan><tspan class="cc"> | </tspan><tspan class="key">Reviews</tspan><tspan class="cc">: ................ </tspan><tspan class="value">1,205</tspan></tspan>
-    <tspan x="410" y="650"><tspan class="cc">. </tspan><tspan class="key">Contribs</tspan><tspan class="cc">: .................. </tspan><tspan class="value">8,957</tspan><tspan class="cc"> | </tspan><tspan class="key">Repos</tspan><tspan class="cc">: .. </tspan><tspan class="value">131 {<tspan class="key">Contrib</tspan>: <tspan class="cc">...</tspan>151}</tspan></tspan>
-    <tspan x="410" y="670"><tspan class="cc">. </tspan><tspan class="key">Uptime</tspan><tspan class="cc">: .................. </tspan><tspan class="value">1y 333d</tspan><tspan class="cc"> | </tspan><tspan class="key">Streak</tspan><tspan class="cc">: . </tspan><tspan class="value">36d {<tspan class="key">Best</tspan>: <tspan class="cc">......</tspan>49d}</tspan></tspan>
-    <tspan x="410" y="690"><tspan class="cc">. </tspan><tspan class="key">Lines of Code</tspan><tspan class="cc">: ................. </tspan><tspan class="value">0</tspan><tspan class="cc"> | </tspan>{          <tspan class="addColor">0</tspan>++, <tspan class="delColor">0</tspan>--           }</tspan>
+    <tspan x="410" y="610"><tspan class="cc">. </tspan><tspan class="key">Forks</tspan><tspan class="cc">: ........................ </tspan><tspan class="value">58</tspan><tspan class="cc"> | </tspan><tspan class="key">Gists</tspan><tspan class="cc">: ..................... </tspan><tspan class="value">32</tspan></tspan>
+    <tspan x="410" y="630"><tspan class="cc">. </tspan><tspan class="key">Commits</tspan><tspan class="cc">: ................... </tspan><tspan class="value">3,537</tspan><tspan class="cc"> | </tspan><tspan class="key">PRs</tspan><tspan class="cc">: .................... </tspan><tspan class="value">2,197</tspan></tspan>
+    <tspan x="410" y="650"><tspan class="cc">. </tspan><tspan class="key">Issues</tspan><tspan class="cc">: .................... </tspan><tspan class="value">1,708</tspan><tspan class="cc"> | </tspan><tspan class="key">Reviews</tspan><tspan class="cc">: ................ </tspan><tspan class="value">1,205</tspan></tspan>
+    <tspan x="410" y="670"><tspan class="cc">. </tspan><tspan class="key">Contribs</tspan><tspan class="cc">: .................. </tspan><tspan class="value">8,957</tspan><tspan class="cc"> | </tspan><tspan class="key">Repos</tspan><tspan class="cc">: .. </tspan><tspan class="value">131 {<tspan class="key">Contrib</tspan>: <tspan class="cc">...</tspan>151}</tspan></tspan>
+    <tspan x="410" y="690"><tspan class="cc">. </tspan><tspan class="key">Uptime</tspan><tspan class="cc">: .................. </tspan><tspan class="value">1y 333d</tspan><tspan class="cc"> | </tspan><tspan class="key">Streak</tspan><tspan class="cc">: . </tspan><tspan class="value">36d {<tspan class="key">Best</tspan>: <tspan class="cc">......</tspan>49d}</tspan></tspan>
+    <tspan x="410" y="710"><tspan class="cc">. </tspan><tspan class="key">Lines of Code</tspan><tspan class="cc">: ......... </tspan><tspan class="value">1,958,681</tspan><tspan class="cc"> | </tspan>{   <tspan class="addColor">2,317,191</tspan>++, <tspan class="delColor">358,510</tspan>--    }</tspan>
   </text>
 </svg>

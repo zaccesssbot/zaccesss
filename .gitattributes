@@ -4,3 +4,6 @@
 # generated keeps each forge's language bar on Python rather than SVG and collapses the
 # noisy per-build SVG diffs in reviews.
 *.svg linguist-generated=true
+
+# the last good value of every stat, rewritten by profile.py on each build
+profile/last-good.json linguist-generated=true

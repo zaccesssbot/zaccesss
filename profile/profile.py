@@ -16,6 +16,10 @@ I generate three SVG cards (profile.svg, profile-dark.svg and profile-light.svg)
   - Left column:  my ASCII art portrait (44 cols x 30 rows, loaded from ascii_profile.txt)
   - Right column: neofetch-style info block + live GitHub stats pulled from the API
 
+Every stat group I fetch is also written to profile/last-good.json. When the API will not
+give me a group even after retries, the card keeps that group's last good figures rather than
+showing a zero; only a group with no stored value at all stops the run.
+
 To run locally I need my ACCESS_TOKEN set as an environment variable:
     export ACCESS_TOKEN=<fine-grained-PAT>
     python profile/profile.py
@@ -23,6 +27,8 @@ To run locally I need my ACCESS_TOKEN set as an environment variable:
 
 import os
 import sys
+import json
+import time
 import datetime
 import requests
 from dateutil.relativedelta import relativedelta
@@ -36,6 +42,14 @@ USERNAME   = 'zaccesss'  # GitHub username to query
 
 ASCII_ART_PATH = os.path.join(os.path.dirname(__file__), '..', 'assets', 'ascii_profile.txt')  # path to ASCII portrait file, one level up in the repo root
 GRAPHQL_URL    = 'https://api.github.com/graphql'  # GitHub GraphQL endpoint
+
+OUT_DIR        = os.path.dirname(os.path.abspath(__file__))     # where the three SVGs are written
+LAST_GOOD_PATH = os.path.join(OUT_DIR, 'last-good.json')        # the last successfully fetched value of every stat group
+
+# waits between attempts when the API answers with a 5xx, a 429 or no answer at all. Four runs in
+# a row hit a 502 from api.github.com/graphql and the card showed zero lines of code each time, so
+# a transient failure is now retried three times before it counts as a real one.
+RETRY_WAITS = (2, 4, 8)
 
 # portrait dimensions (rows must match ascii_profile.txt line count)
 ASCII_ROWS = 30  # must match the line count of ascii_profile.txt
@@ -57,11 +71,15 @@ ASCII_X = 35   # left edge of the ASCII portrait column
 STATS_X = 410  # left edge of the stats column
 ASCII_FONT_SIZE = 13  # px; a size down from the 16px stats font so the 44-char-wide portrait
                        # leaves a real gap before STATS_X instead of almost touching it
-ASCII_Y_OFFSET = ROW_STEP  # visually centres the portrait after the taller Git Stats block
 
-# stats rows: content goes to row 33 (y=690); SVG height adds bottom margin.
-STATS_ROWS = 34                                                        # total number of rows in the stats block
-SVG_HEIGHT = ROW_START + (STATS_ROWS - 1) * ROW_STEP + ROW_STEP + 20  # 730px total canvas height
+# stats rows: content goes to row 34 (y=710); SVG height adds bottom margin.
+STATS_ROWS = 35                                                        # total number of rows in the stats block
+SVG_HEIGHT = ROW_START + (STATS_ROWS - 1) * ROW_STEP + ROW_STEP + 20  # 750px total canvas height
+
+# first baseline of the portrait. Computed from the card rather than fixed so the portrait stays
+# centred when the stats block grows: the block is ASCII_ROWS lines at ROW_STEP, its middle sits on
+# the card's middle and the baseline falls a little under the middle of its 20px line box.
+ASCII_Y0 = (SVG_HEIGHT - ASCII_ROWS * ROW_STEP) // 2 + ROW_STEP // 2 + ASCII_FONT_SIZE // 3
 
 # ---------------------------------------------------------------------------
 # colour schemes
@@ -92,16 +110,41 @@ def load_ascii_art(path: str) -> list[str]:
 # GitHub API helpers
 # ---------------------------------------------------------------------------
 
+class TransientAPIError(RuntimeError):
+    """The API could not be reached or answered 5xx or 429 on every attempt.
+
+    Kept distinct from a GraphQL error on one repository or one year so the loops below can
+    tell "the API is down" (give up on the whole group and carry over the last good value)
+    from "this one item is odd" (skip it with a warning and keep counting).
+    """
+
+
 def graphql(token: str, query: str, variables: dict | None = None) -> dict:
     headers = {'Authorization': f'bearer {token}', 'Content-Type': 'application/json'}  # bearer auth for GitHub API
-    resp = requests.post(GRAPHQL_URL,
-                         json={'query': query, 'variables': variables or {}},
-                         headers=headers, timeout=30)  # 30-second timeout so a slow API cannot hang the workflow
-    resp.raise_for_status()
-    result = resp.json()
-    if 'errors' in result:
-        raise RuntimeError(f'GraphQL errors: {result["errors"]}')
-    return result.get('data', {})
+    payload = {'query': query, 'variables': variables or {}}
+    last_error: Exception | None = None
+    for attempt in range(len(RETRY_WAITS) + 1):
+        if attempt:
+            wait = RETRY_WAITS[attempt - 1]
+            print(f'  Retrying in {wait}s (attempt {attempt + 1} of {len(RETRY_WAITS) + 1}): {last_error}',
+                  file=sys.stderr)
+            time.sleep(wait)
+        try:
+            resp = requests.post(GRAPHQL_URL, json=payload, headers=headers, timeout=30)  # 30-second timeout so a slow API cannot hang the workflow
+        except requests.exceptions.RequestException as e:
+            last_error = e
+            continue
+        # a 5xx or a 429 is the API's problem, not the query's, so it is worth another go.
+        # any other 4xx (a bad token, a malformed query) will not get better by waiting.
+        if resp.status_code >= 500 or resp.status_code == 429:
+            last_error = requests.exceptions.HTTPError(f'{resp.status_code} from {GRAPHQL_URL}', response=resp)
+            continue
+        resp.raise_for_status()
+        result = resp.json()
+        if 'errors' in result:
+            raise RuntimeError(f'GraphQL errors: {result["errors"]}')
+        return result.get('data', {})
+    raise TransientAPIError(f'GitHub API unavailable after {len(RETRY_WAITS) + 1} attempts: {last_error}')
 
 
 def get_user_info(token: str, username: str) -> tuple[int, int, int, int, int, int, str]:
@@ -230,9 +273,11 @@ def get_streak(token: str, username: str, creation_year: int) -> tuple[int, int]
     and run the streak count over the full stitched-together history rather than a single window.
     """
     days = []
-    for year in range(creation_year, datetime.datetime.utcnow().year + 1):
+    for year in range(creation_year, datetime.datetime.now(datetime.timezone.utc).year + 1):
         try:
             days.extend(get_contribution_days_for_year(token, username, year))
+        except TransientAPIError:
+            raise  # a year missing from the middle would make the streak wrong, so give the whole group up
         except Exception as e:
             print(f'  Warning (streak {year}): {e}', file=sys.stderr)
     days.sort(key=lambda x: x[0])
@@ -260,12 +305,14 @@ def get_streak(token: str, username: str, creation_year: int) -> tuple[int, int]
 def get_all_contributions(token: str, username: str, creation_year: int) -> tuple[int, int, int]:
     """Sum commits, reviews and total contributions across every year since account creation."""
     commits = reviews = total_contribs = 0
-    for year in range(creation_year, datetime.datetime.utcnow().year + 1):  # walk every year from account creation to today
+    for year in range(creation_year, datetime.datetime.now(datetime.timezone.utc).year + 1):  # walk every year from account creation to today
         try:
             year_commits, year_reviews, year_total = get_contributions_for_year(token, username, year)
             commits += year_commits
             reviews += year_reviews
             total_contribs += year_total
+        except TransientAPIError:
+            raise  # a partial sum is not a figure worth showing or storing
         except Exception as e:
             print(f'  Warning (contributions {year}): {e}', file=sys.stderr)
     return commits, reviews, total_contribs
@@ -354,6 +401,8 @@ def get_loc(token: str, username: str) -> tuple[int, int, int]:
                 if not page.get('hasNextPage'):
                     break
                 cursor = page.get('endCursor')
+        except TransientAPIError:
+            raise  # a partial total is not a figure worth showing or storing
         except Exception as e:
             print(f'  Warning (LOC {repo}): {e}', file=sys.stderr)
     return add, delete, add - delete
@@ -558,7 +607,7 @@ def build_svg(
 
     # ASCII art at ASCII_FONT_SIZE: keeps 44-char lines clear of the stats column at x={STATS_X}
     ascii_tspans = [
-        f'    <tspan x="{ASCII_X}" y="{ROW_START + ROW_STEP + 10 + ASCII_Y_OFFSET + i * ROW_STEP}">{esc(line)}</tspan>'
+        f'    <tspan x="{ASCII_X}" y="{ASCII_Y0 + i * ROW_STEP}">{esc(line)}</tspan>'
         for i, line in enumerate(ascii_rows)
     ]
 
@@ -603,7 +652,7 @@ def build_svg(
         blank(Y[19]),
 
         section_header(Y[20], 'Contact'),
-        info_row(Y[21], 'Discord',        'zac.cess'),
+        info_row(Y[21], 'Discord',        'zaccesss'),
         info_row(Y[22], 'LinkedIn',       'in/isaacadjei'),
         info_row(Y[23], 'Portfolio',      'isaacadjei.me'),
         info_row(Y[24], 'Email.Main',     'hello@isaacadjei.me'),
@@ -613,14 +662,13 @@ def build_svg(
 
         section_header(Y[27], 'Git Stats'),
         dual_row(Y[28], 'Followers',      fmt(followers),        'Stars',          fmt(stars)),
-        # forks and Gists are both 0 right now, so this row returns once there are some.
-        # dual_row(Y[?], 'Forks',        fmt(forks),            'Gists',          fmt(gists)),
-        dual_row(Y[29], 'Commits',        fmt(commits),          'PRs',            fmt(prs)),
-        dual_row(Y[30], 'Issues',         fmt(issues),           'Reviews',        fmt(reviews)),
+        dual_row(Y[29], 'Forks',          fmt(forks),            'Gists',          fmt(gists)),
+        dual_row(Y[30], 'Commits',        fmt(commits),          'PRs',            fmt(prs)),
+        dual_row(Y[31], 'Issues',         fmt(issues),           'Reviews',        fmt(reviews)),
         # the three curly-brace detail rows sit together at the bottom, by design.
-        contribs_repos_row(Y[31], 'Contribs', fmt(total_contribs), repos, contributed, brace_col=brace_col_target),
-        dual_row_detail(Y[32], 'Uptime', uptime,   'Streak',         f'{fmt(current_streak)}d', 'Best', f'{fmt(longest_streak)}d', brace_col=brace_col_target),
-        loc_dual_row(Y[33], loc_total, loc_add, loc_del),
+        contribs_repos_row(Y[32], 'Contribs', fmt(total_contribs), repos, contributed, brace_col=brace_col_target),
+        dual_row_detail(Y[33], 'Uptime', uptime,   'Streak',         f'{fmt(current_streak)}d', 'Best', f'{fmt(longest_streak)}d', brace_col=brace_col_target),
+        loc_dual_row(Y[34], loc_total, loc_add, loc_del),
     ]
 
     ascii_block = '\n'.join(ascii_tspans)
@@ -645,6 +693,53 @@ def build_svg(
 </svg>"""
 
 # ---------------------------------------------------------------------------
+# last good values
+# ---------------------------------------------------------------------------
+
+def load_last_good(path: str | None = None) -> dict:
+    """Return the stored stat groups or an empty dict when there is no file yet."""
+    try:
+        with open(path or LAST_GOOD_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_last_good(store: dict, path: str | None = None) -> None:
+    """Write the store sorted and indented so its diffs in git stay readable."""
+    with open(path or LAST_GOOD_PATH, 'w', encoding='utf-8') as f:
+        json.dump(store, f, indent=2, sort_keys=True)
+        f.write('\n')
+
+
+def fetch_group(group: str, fields: tuple[str, ...], fetch, store: dict) -> tuple:
+    """Fetch one stat group, recording it in the store on success.
+
+    fetch() returns a tuple in the order of fields. When it fails after the retries inside
+    graphql(), the group's stored values are used instead and the carry-over is logged. A group
+    with no stored value at all ends the run with status 1 before any SVG is written, because
+    a card showing zero for a figure it had yesterday is worse than a card that did not update.
+    """
+    try:
+        values = tuple(fetch())
+    except Exception as e:
+        print(f'  Warning ({group}): {e}', file=sys.stderr)
+        stored = store.get(group)
+        if not stored or any(name not in stored for name in fields):
+            print(f'ERROR: {group} could not be fetched and {os.path.basename(LAST_GOOD_PATH)} '
+                  f'holds no value for it; not writing any SVG.', file=sys.stderr)
+            sys.exit(1)
+        print(f'Carried over {group} from {os.path.basename(LAST_GOOD_PATH)} ({stored.get("updated", "no timestamp")})',
+              file=sys.stderr)
+        return tuple(stored[name] for name in fields)
+    entry = dict(zip(fields, values))
+    entry['updated'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    store[group] = entry
+    return values
+
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
 
@@ -666,41 +761,32 @@ def main() -> None:
     print('Loading ASCII art...')
     ascii_rows = load_ascii_art(ASCII_ART_PATH)
 
+    store = load_last_good()
+
     print('Fetching GitHub stats...')
-    try:
-        followers, prs, contributed, issues, gists, creation_year, created_at = get_user_info(token, username)
-    except Exception as e:
-        print(f'  Warning: {e}', file=sys.stderr)
-        # safe defaults if the API call fails
-        followers, prs, contributed, issues, gists, creation_year, created_at = 0, 0, 0, 0, 0, 2022, '2022-01-01T00:00:00Z'
+    followers, prs, contributed, issues, gists, creation_year, created_at = fetch_group(
+        'user', ('followers', 'prs', 'contributed', 'issues', 'gists', 'creation_year', 'created_at'),
+        lambda: get_user_info(token, username), store)
     uptime = fmt_uptime(created_at)
 
-    try:
-        repos, stars, forks = get_repos_stars_and_forks(token, username)
-    except Exception as e:
-        print(f'  Warning: {e}', file=sys.stderr)
-        repos, stars, forks = 0, 0, 0
+    repos, stars, forks = fetch_group(
+        'repos', ('repos', 'stars', 'forks'),
+        lambda: get_repos_stars_and_forks(token, username), store)
 
     print('  Counting commit and review contributions...')
-    try:
-        commits, reviews, total_contribs = get_all_contributions(contrib_token, username, creation_year)
-    except Exception as e:
-        print(f'  Warning: {e}', file=sys.stderr)
-        commits, reviews, total_contribs = 0, 0, 0
+    commits, reviews, total_contribs = fetch_group(
+        'contributions', ('commits', 'reviews', 'total_contribs'),
+        lambda: get_all_contributions(contrib_token, username, creation_year), store)
 
     print('  Calculating lines of code...')
-    try:
-        loc_add, loc_del, loc_total = get_loc(token, username)
-    except Exception as e:
-        print(f'  Warning: {e}', file=sys.stderr)
-        loc_add, loc_del, loc_total = 0, 0, 0
+    loc_add, loc_del, loc_total = fetch_group(
+        'lines_of_code', ('added', 'deleted', 'net'),
+        lambda: get_loc(token, username), store)
 
     print('  Fetching streak stats...')
-    try:
-        current_streak, longest_streak = get_streak(contrib_token, username, creation_year)
-    except Exception as e:
-        print(f'  Warning: {e}', file=sys.stderr)
-        current_streak, longest_streak = 0, 0
+    current_streak, longest_streak = fetch_group(
+        'streak', ('current', 'best'),
+        lambda: get_streak(contrib_token, username, creation_year), store)
 
     print(f'  Followers: {followers} | Stars: {stars}')
     print(f'  Repos: {repos} | Contributed: {contributed} | Contribs: {total_contribs}')
@@ -720,13 +806,13 @@ def main() -> None:
         loc_total, loc_add, loc_del,
         current_streak, longest_streak,
     )
-    out_dir = os.path.dirname(__file__)
-    with open(os.path.join(out_dir, 'profile.svg'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUT_DIR, 'profile.svg'), 'w', encoding='utf-8') as f:
         f.write(build_svg(*stat_args, mode='adaptive'))
-    with open(os.path.join(out_dir, 'profile-dark.svg'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUT_DIR, 'profile-dark.svg'), 'w', encoding='utf-8') as f:
         f.write(build_svg(*stat_args, mode='dark'))
-    with open(os.path.join(out_dir, 'profile-light.svg'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUT_DIR, 'profile-light.svg'), 'w', encoding='utf-8') as f:
         f.write(build_svg(*stat_args, mode='light'))
+    save_last_good(store)
     print('Done.')
 
 

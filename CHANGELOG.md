@@ -8,11 +8,23 @@ because it is a living profile rather than a released library.
 
 ## 2026-11-03
 
+### Fixed
+
+- The card no longer shows zero lines of code when the GitHub API answers with a 502. The generator retries a 5xx, a 429 or a dropped connection three times (2, 4 and 8 second waits) and a run that still fails carries the stat over from `profile/last-good.json`, logging which stat was carried and from when. A stat with no stored value ends the run without writing a card. A partial total (one year or one repo missing because the API went away mid-count) is never shown or stored.
+
 ### Changed
 
 - Community files follow the [AI policy](https://github.com/zaccesss/ai-policy): pull requests declare AI use and issue forms ask whether AI helped. Security reports go to security@isaacadjei.me.
+- The build commits `profile/last-good.json` beside the cards and ignores it as a trigger, so a build commit cannot start another build.
+- The Git Stats block shows Forks and Gists again, on a row under Followers and Stars, now that both have real figures. The card grows by one row to 750px.
+- The portrait's position is computed from the card height so it stays centred as the stats block grows, instead of a fixed offset that left it sitting high.
+- The card images carry a new cache number (17) so GitHub shows the new shape straight away.
+- The Contact block shows Discord as zaccesss.
 
 ### Added
+
+- `profile/last-good.json` holds the last good value of every stat group (user, repos, contributions, lines of code, streak) with a timestamp, seeded from the 3 November cards so the first run after this change already has a fallback.
+- `profile/test_profile.py` checks the retry, the carry-over and the no-fallback exit with the API stubbed; CI runs it. `requirements-dev.txt` adds pytest for CI and local runs.
 
 - `profile/palettes.py` keeps every colour set the card can use in one place: Primer (live) plus a suggested set with a stronger green and red for the lines of code `++` and `--` in bold. It also holds vivid and bold sets plus four sets from the Zacess themes. Only `ACTIVE` is rendered, so the card looks exactly as before; switching to another set is a one-word change.
 

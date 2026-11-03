@@ -9,13 +9,14 @@ on:
     - cron: "17 0,6,12,18 * * *"
   push:
     branches: [main]
-    # the build commits the regenerated SVGs and pushes them with a deploy key which,
-    # unlike GITHUB_TOKEN, re-triggers workflows. The generated SVGs are ignored so an
-    # SVG-only commit cannot start another build and loop. approach.svg itself is
+    # the build commits the regenerated SVGs and last-good.json and pushes them with a deploy
+    # key which, unlike GITHUB_TOKEN, re-triggers workflows. The generated files are ignored so
+    # a build commit cannot start another build and loop. approach.svg itself is
     # excluded from this list since it's the hand-edited source, not generated output -
     # editing it should still trigger a build so its dark/light siblings regenerate.
     paths-ignore:
       - 'profile/profile*.svg'
+      - 'profile/last-good.json'
       - 'approach/approach-dark.svg'
       - 'approach/approach-light.svg'
   workflow_dispatch:
@@ -65,7 +66,11 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
-      # run the generator. It pulls live GitHub stats and writes profile.svg.
+      # run the generator. It pulls live GitHub stats, writes profile.svg and records every
+      # stat it fetched in profile/last-good.json. A stat the API will not give it after the
+      # retries is carried over from that file; if the file has no value for it either the
+      # generator exits 1, which fails this step and so skips the commit below (every step
+      # here runs under the default bash -e shell and none carries an always() condition).
       # ACCESS_TOKEN lives in: Settings > Secrets and variables > Actions > New repository secret
       # it needs read access to the account and its repositories so it can fetch stats.
       # CONTRIB_TOKEN is a separate classic PAT scoped to read:user only, no repo access at all.
@@ -84,7 +89,7 @@ jobs:
       - name: Generate the approach SVG variants
         run: python approach/approach.py
 
-      # commit the freshly generated SVGs back to the repo under a separate automation identity.
+      # commit the freshly generated SVGs and last-good.json back to the repo under a separate automation identity.
       # the diff check means a commit only happens when something actually changed.
       # push to GitHub (using the token actions/checkout already configured);
       # mirroring to the other forges is handled server-side by mirror-ops.
@@ -104,18 +109,18 @@ jobs:
           # actually show as Verified rather than the unlinked placeholder identity this used.
           git config --global user.email "automation@isaacadjei.me"
           git config --global user.name "zaccesssbot"
-          git add profile/profile.svg profile/profile-dark.svg profile/profile-light.svg approach/approach-dark.svg approach/approach-light.svg
+          git add profile/profile.svg profile/profile-dark.svg profile/profile-light.svg profile/last-good.json approach/approach-dark.svg approach/approach-light.svg
           if git diff --staged --quiet; then
-            echo "SVGs unchanged; nothing to commit."
+            echo "SVGs and last-good.json unchanged; nothing to commit."
             exit 0
           fi
           git commit -m "chore: update generated SVGs"
           # if the remote moved ahead while we were running, replant only our freshly
-          # generated SVGs on top of the new tip and retry. A soft reset would keep this
+          # generated SVGs and last-good.json on top of the new tip and retry. A soft reset would keep this
           # run's older copy of every other file staged and quietly revert whatever landed
           # on main meanwhile, so the SVGs are set aside and the tree is reset hard instead.
           # 'if git push' keeps a failed push from tripping 'set -e' mid-loop.
-          svgs="profile/profile.svg profile/profile-dark.svg profile/profile-light.svg approach/approach-dark.svg approach/approach-light.svg"
+          svgs="profile/profile.svg profile/profile-dark.svg profile/profile-light.svg profile/last-good.json approach/approach-dark.svg approach/approach-light.svg"
           keep="$(mktemp -d)"
           for f in $svgs; do mkdir -p "$keep/$(dirname "$f")"; cp "$f" "$keep/$f"; done
           pushed=false

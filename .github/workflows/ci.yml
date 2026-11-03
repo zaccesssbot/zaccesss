@@ -1,5 +1,6 @@
 # lightweight CI so a broken change cannot land. It compiles and import checks the
-# generator scripts. There is no build step, they are plain scripts, so this is quick.
+# generator scripts and runs the generator's tests against a stubbed API. There is no
+# build step, they are plain scripts, so this is quick.
 
 name: CI
 
@@ -29,10 +30,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements*.txt
 
-      # install the dependencies so the import check below is a real check.
+      # install the dependencies plus pytest so the import check and the tests below are real.
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
       # byte compile each script to catch syntax errors, then import it to catch
       # import and wiring errors. The token is only read inside main() under the
@@ -42,3 +44,8 @@ jobs:
           python -m compileall -q profile/profile.py profile/palettes.py approach/approach.py
           python -c "import sys; sys.path.insert(0, 'profile'); import profile"
           python -c "import sys; sys.path.insert(0, 'approach'); import approach"
+
+      # the generator's retry and last good value handling, with requests stubbed so no
+      # token and no network are needed.
+      - name: Run the generator tests
+        run: python -m pytest -q profile/test_profile.py
