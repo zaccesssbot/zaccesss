@@ -30,8 +30,7 @@ def gen(monkeypatch, tmp_path):
     monkeypatch.setattr(module.time, 'sleep', lambda s: None)  # no real waiting between attempts
     monkeypatch.setattr(module, 'OUT_DIR', str(tmp_path))
     monkeypatch.setattr(module, 'LAST_GOOD_PATH', str(tmp_path / 'last-good.json'))
-    monkeypatch.setenv('ACCESS_TOKEN', 'test-token')
-    monkeypatch.delenv('CONTRIB_TOKEN', raising=False)
+    monkeypatch.setenv('PUBLIC_TOKEN', 'test-token')
     return module
 
 

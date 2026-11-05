@@ -71,16 +71,13 @@ jobs:
       # retries is carried over from that file; if the file has no value for it either the
       # generator exits 1, which fails this step and so skips the commit below (every step
       # here runs under the default bash -e shell and none carries an always() condition).
-      # ACCESS_TOKEN lives in: Settings > Secrets and variables > Actions > New repository secret
-      # it needs read access to the account and its repositories so it can fetch stats.
-      # CONTRIB_TOKEN is a separate classic PAT scoped to read:user only, no repo access at all.
-      # GitHub's contributionsCollection withholds private-repo detail (commits, reviews, the
-      # calendar) from every API caller without that scope; no fine-grained permission grants
-      # it, so this is the one place a classic PAT is unavoidable - held as narrowly as possible.
+      # PUBLIC_TOKEN lives in: Settings > Secrets and variables > Actions > New repository secret.
+      # it is a fine-grained token from another account with public repositories read-only, so
+      # GitHub answers as it would any visitor and the card shows public work only. A token of
+      # mine would count private contributions and private repositories.
       - name: Generate the profile SVG
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          CONTRIB_TOKEN: ${{ secrets.CONTRIB_TOKEN }}
+          PUBLIC_TOKEN: ${{ secrets.PUBLIC_TOKEN }}
           USER_NAME: zaccesss
         run: python profile/profile.py
 

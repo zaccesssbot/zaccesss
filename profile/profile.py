@@ -20,8 +20,11 @@ Every stat group I fetch is also written to profile/last-good.json. When the API
 give me a group even after retries, the card keeps that group's last good figures rather than
 showing a zero; only a group with no stored value at all stops the run.
 
-To run locally I need my ACCESS_TOKEN set as an environment variable:
-    export ACCESS_TOKEN=<fine-grained-PAT>
+Every figure on the card is public only, matching my profile now that private contributions
+are hidden there. The stats are read with PUBLIC_TOKEN, a token from another account with no
+repository access, so GitHub answers exactly as it would any visitor. My own token would count
+private work. To run locally I need that token set as an environment variable:
+    export PUBLIC_TOKEN=<fine-grained-PAT from the other account>
     python profile/profile.py
 """
 
@@ -187,7 +190,7 @@ def get_repos_stars_and_forks(token: str, username: str) -> tuple[int, int, int]
         query ($login: String!, $cursor: String) {
             user(login: $login) {
                 repositories(first: 100, after: $cursor, ownerAffiliations: [OWNER, ORGANIZATION_MEMBER],
-                             orderBy: {field: UPDATED_AT, direction: DESC}) {
+                             privacy: PUBLIC, orderBy: {field: UPDATED_AT, direction: DESC}) {
                     nodes { stargazerCount forkCount }
                     pageInfo { hasNextPage endCursor }
                     totalCount
@@ -337,7 +340,8 @@ def get_loc(token: str, username: str) -> tuple[int, int, int]:
             query ($login: String!, $cursor: String) {
                 user(login: $login) {
                     repositories(first: 100, after: $cursor,
-                                 ownerAffiliations: [OWNER, ORGANIZATION_MEMBER], isFork: false) {
+                                 ownerAffiliations: [OWNER, ORGANIZATION_MEMBER], isFork: false,
+                                 privacy: PUBLIC) {
                         nodes { nameWithOwner isEmpty defaultBranchRef { name } }
                         pageInfo { hasNextPage endCursor }
                     }
@@ -744,18 +748,12 @@ def fetch_group(group: str, fields: tuple[str, ...], fetch, store: dict) -> tupl
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    token = os.environ.get('ACCESS_TOKEN', '').strip()
+    # never falls back to one of my own tokens: GitHub would count private contributions and private
+    # repositories for it, which the public card must not show.
+    token = os.environ.get('PUBLIC_TOKEN', '').strip()
     if not token:
-        print('ERROR: ACCESS_TOKEN environment variable is not set.', file=sys.stderr)
+        print('ERROR: PUBLIC_TOKEN environment variable is not set.', file=sys.stderr)
         sys.exit(1)
-    # GitHub's contributionsCollection withholds private-repo detail (commits, reviews, the
-    # calendar) from every API caller, even the account owner, unless the token carries the
-    # classic read:user scope - no fine-grained permission grants this. CONTRIB_TOKEN is a
-    # separate classic PAT scoped to read:user only, with no repo access at all, so there is no need
-    # to widen ACCESS_TOKEN's own repo-content permissions just to see private contributions.
-    # falls back to ACCESS_TOKEN so this still runs (with public-only contribution counts) before
-    # the secret exists or for local testing with a token that already carries read:user.
-    contrib_token = os.environ.get('CONTRIB_TOKEN', '').strip() or token
     username = os.environ.get('USER_NAME', USERNAME)  # USER_NAME env var overrides the hardcoded default
 
     print('Loading ASCII art...')
@@ -776,7 +774,7 @@ def main() -> None:
     print('  Counting commit and review contributions...')
     commits, reviews, total_contribs = fetch_group(
         'contributions', ('commits', 'reviews', 'total_contribs'),
-        lambda: get_all_contributions(contrib_token, username, creation_year), store)
+        lambda: get_all_contributions(token, username, creation_year), store)
 
     print('  Calculating lines of code...')
     loc_add, loc_del, loc_total = fetch_group(
@@ -786,7 +784,7 @@ def main() -> None:
     print('  Fetching streak stats...')
     current_streak, longest_streak = fetch_group(
         'streak', ('current', 'best'),
-        lambda: get_streak(contrib_token, username, creation_year), store)
+        lambda: get_streak(token, username, creation_year), store)
 
     print(f'  Followers: {followers} | Stars: {stars}')
     print(f'  Repos: {repos} | Contributed: {contributed} | Contribs: {total_contribs}')
