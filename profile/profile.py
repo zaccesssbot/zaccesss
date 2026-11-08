@@ -180,29 +180,64 @@ def get_user_info(token: str, username: str) -> tuple[int, int, int, int, int, i
     )
 
 
+def get_distinct_repos(token: str, username: str) -> int:
+    """Return how many different public repositories I own, belong to through an organisation or have contributed to.
+
+    Forks are in the first list and not in the repos figure. An organisation repository I joined but never
+    touched is in the repos figure and not in GitHub's own contributed-to count. Counting the union of both
+    lists once each gives the figure the card means by Contrib: every repository I own, every fork and
+    everything else I have worked on, which can only be higher than the repos figure.
+    """
+    def names(field: str, arguments: str) -> set[str]:
+        query = """
+            query ($login: String!, $cursor: String) {
+                user(login: $login) {
+                    %s(first: 100, after: $cursor, %s) {
+                        nodes { nameWithOwner }
+                        pageInfo { hasNextPage endCursor }
+                    }
+                }
+            }""" % (field, arguments)
+        found: set[str] = set()
+        cursor = None
+        while True:
+            r = graphql(token, query, {'login': username, 'cursor': cursor}).get('user', {}).get(field, {})
+            found.update(n['nameWithOwner'] for n in r.get('nodes', []) if n.get('nameWithOwner'))
+            page = r.get('pageInfo', {})
+            if not page.get('hasNextPage'):
+                return found
+            cursor = page.get('endCursor')
+
+    owned = names('repositories', 'ownerAffiliations: [OWNER, ORGANIZATION_MEMBER], privacy: PUBLIC')
+    contributed = names('repositoriesContributedTo',
+                        'privacy: PUBLIC, includeUserRepositories: true, '
+                        'contributionTypes: [COMMIT, PULL_REQUEST, PULL_REQUEST_REVIEW, ISSUE, REPOSITORY]')
+    return len(owned | contributed)
+
+
 def get_repos_stars_and_forks(token: str, username: str) -> tuple[int, int, int]:
     """Return (total_repos, total_stars, total_forks) across repos I own or belong to as an org member.
 
     Matches get_loc's affiliation list below, so joining an org counts its repos here the same
     way it already counts towards lines of code, rather than this stat staying personal-only.
+    A fork is not one of my repos, so it is left out of the repo count; get_distinct_repos
+    counts it towards Contrib instead.
     """
     query = """
         query ($login: String!, $cursor: String) {
             user(login: $login) {
                 repositories(first: 100, after: $cursor, ownerAffiliations: [OWNER, ORGANIZATION_MEMBER],
                              privacy: PUBLIC, orderBy: {field: UPDATED_AT, direction: DESC}) {
-                    nodes { stargazerCount forkCount }
+                    nodes { stargazerCount forkCount isFork }
                     pageInfo { hasNextPage endCursor }
-                    totalCount
                 }
             }
         }"""
-    stars, forks, total, cursor, first = 0, 0, 0, None, True
+    stars, forks, total, cursor = 0, 0, 0, None
     while True:
         r = graphql(token, query, {'login': username, 'cursor': cursor})
         r = r.get('user', {}).get('repositories', {})
-        if first:
-            total, first = r.get('totalCount', 0), False  # capture total count from the first page only
+        total += sum(1 for n in r.get('nodes', []) if not n.get('isFork'))
         stars += sum(n.get('stargazerCount', 0) for n in r.get('nodes', []))
         forks += sum(n.get('forkCount', 0) for n in r.get('nodes', []))
         page = r.get('pageInfo', {})
@@ -762,7 +797,7 @@ def main() -> None:
     store = load_last_good()
 
     print('Fetching GitHub stats...')
-    followers, prs, contributed, issues, gists, creation_year, created_at = fetch_group(
+    followers, prs, _, issues, gists, creation_year, created_at = fetch_group(
         'user', ('followers', 'prs', 'contributed', 'issues', 'gists', 'creation_year', 'created_at'),
         lambda: get_user_info(token, username), store)
     uptime = fmt_uptime(created_at)
@@ -770,6 +805,12 @@ def main() -> None:
     repos, stars, forks = fetch_group(
         'repos', ('repos', 'stars', 'forks'),
         lambda: get_repos_stars_and_forks(token, username), store)
+
+    # contrib is every repository counted once across the repos figure and the ones I contributed to. The
+    # larger of the two guards a carried over value: if one group is fresh and the other is a stored figure
+    # from an earlier run, contrib still cannot show below repos
+    (distinct,) = fetch_group('contributed', ('contributed',), lambda: (get_distinct_repos(token, username),), store)
+    contributed = max(distinct, repos)
 
     print('  Counting commit and review contributions...')
     commits, reviews, total_contribs = fetch_group(

@@ -52,10 +52,12 @@ class FakeResponse:
 GOOD_DATA = {
     'user': {
         'followers': {'totalCount': 7}, 'pullRequests': {'totalCount': 8}, 'issues': {'totalCount': 9},
-        'gists': {'totalCount': 1}, 'repositoriesContributedTo': {'totalCount': 5},
+        'gists': {'totalCount': 1},
+        'repositoriesContributedTo': {'totalCount': 5, 'pageInfo': {'hasNextPage': False, 'endCursor': None},
+                                      'nodes': [{'nameWithOwner': 'zaccesss/demo'}, {'nameWithOwner': 'other/thing'}]},
         'createdAt': '2024-12-05T19:07:18Z',
         'repositories': {
-            'nodes': [{'stargazerCount': 3, 'forkCount': 2, 'nameWithOwner': 'zaccesss/demo',
+            'nodes': [{'stargazerCount': 3, 'forkCount': 2, 'isFork': False, 'nameWithOwner': 'zaccesss/demo',
                        'isEmpty': False, 'defaultBranchRef': {'name': 'main'}}],
             'pageInfo': {'hasNextPage': False, 'endCursor': None}, 'totalCount': 1,
         },
@@ -73,6 +75,7 @@ GOOD_DATA = {
 }
 
 STORED = {
+    'contributed': {'contributed': 160, 'updated': '2026-11-03T18:01:36Z'},
     'contributions': {'commits': 3537, 'reviews': 1205, 'total_contribs': 8957, 'updated': '2026-11-03T18:01:36Z'},
     'lines_of_code': {'added': 2317191, 'deleted': 358510, 'net': 1958681, 'updated': '2026-11-03T14:22:29Z'},
     'repos': {'forks': 58, 'repos': 131, 'stars': 93, 'updated': '2026-11-03T18:01:36Z'},
@@ -129,7 +132,9 @@ def test_successful_run_writes_svgs_and_last_good(gen, monkeypatch, tmp_path):
     for name in ('profile.svg', 'profile-dark.svg', 'profile-light.svg'):
         assert (tmp_path / name).exists()
     store = json.loads((tmp_path / 'last-good.json').read_text())
-    assert sorted(store) == ['contributions', 'lines_of_code', 'repos', 'streak', 'user']
+    assert sorted(store) == ['contributed', 'contributions', 'lines_of_code', 'repos', 'streak', 'user']
+    # the demo repository is in both lists and the other one only in the contributed list, so two different repositories
+    assert store['contributed']['contributed'] == 2
     assert store['lines_of_code'] == {'added': 100, 'deleted': 40, 'net': 60,
                                       'updated': store['lines_of_code']['updated']}
     assert store['user']['followers'] == 7
@@ -154,7 +159,7 @@ def test_every_fetch_failing_uses_the_stored_values(gen, monkeypatch, tmp_path, 
     err = capsys.readouterr().err
     for group, stamp in (('lines_of_code', '2026-11-03T14:22:29Z'), ('streak', '2026-11-03T18:01:36Z'),
                          ('user', '2026-11-03T18:01:36Z'), ('repos', '2026-11-03T18:01:36Z'),
-                         ('contributions', '2026-11-03T18:01:36Z')):
+                         ('contributions', '2026-11-03T18:01:36Z'), ('contributed', '2026-11-03T18:01:36Z')):
         assert f'Carried over {group} from last-good.json ({stamp})' in err
     # a carried over group keeps its old timestamp; nothing was fetched so nothing changes
     assert json.loads((tmp_path / 'last-good.json').read_text()) == STORED
@@ -189,6 +194,54 @@ def test_a_transient_error_mid_loop_gives_the_group_up(gen, monkeypatch, tmp_pat
     assert store['user']['followers'] == 7                      # fetched this run
     assert store['lines_of_code'] == STORED['lines_of_code']    # carried over, not zero or partial
     assert store['streak'] == STORED['streak']
+
+
+def test_contrib_counts_every_repository_once_and_never_shows_below_repos(gen, monkeypatch):
+    # owned or org repos and contributed-to repos overlap on one name. Each list spans two pages
+    answers = {
+        'repositories': [(['a/one', 'a/two'], True), (['a/three'], False)],
+        'repositoriesContributedTo': [(['a/two', 'b/four'], True), (['c/five'], False)],
+    }
+    seen = []
+
+    def post(*args, **kwargs):
+        query = kwargs['json']['query']
+        field = 'repositoriesContributedTo' if 'repositoriesContributedTo' in query else 'repositories'
+        names, more = answers[field].pop(0)
+        seen.append(field)
+        page = {'hasNextPage': more, 'endCursor': 'next' if more else None}
+        return FakeResponse(200, {'data': {'user': {field: {'nodes': [{'nameWithOwner': n} for n in names], 'pageInfo': page}}}})
+    monkeypatch.setattr(gen.requests, 'post', post)
+
+    assert gen.get_distinct_repos('t', 'zaccesss') == 5
+    assert seen == ['repositories', 'repositories', 'repositoriesContributedTo', 'repositoriesContributedTo']
+
+
+def test_a_stored_contrib_below_fresh_repos_is_lifted_to_repos(gen, monkeypatch, tmp_path, capsys):
+    # repos is fetched fresh at 131 while the contributed group can only be carried over at 100
+    stored = dict(STORED, contributed={'contributed': 100, 'updated': '2026-11-03T18:01:36Z'})
+    (tmp_path / 'last-good.json').write_text(json.dumps(stored) + '\n')
+    big = json.loads(json.dumps(GOOD_DATA))
+    demo = big['user']['repositories']['nodes'][0]
+    big['user']['repositories']['nodes'] = [dict(demo, nameWithOwner=f'zaccesss/repo-{i}') for i in range(131)]
+    state = {'n': 0}
+
+    def post(*a, **k):
+        state['n'] += 1
+        # user info, then repos, then the contributed group goes down
+        return FakeResponse(200, {'data': big}) if state['n'] <= 2 else FakeResponse(503)
+    monkeypatch.setattr(gen.requests, 'post', post)
+    gen.main()
+
+    assert 'Repos: 131 | Contributed: 131' in capsys.readouterr().out
+
+
+def test_a_fork_is_left_out_of_repos_but_its_stars_still_count(gen, monkeypatch):
+    page = {'user': {'repositories': {'pageInfo': {'hasNextPage': False, 'endCursor': None},
+                                      'nodes': [{'stargazerCount': 4, 'forkCount': 1, 'isFork': False},
+                                                {'stargazerCount': 2, 'forkCount': 0, 'isFork': True}]}}}
+    monkeypatch.setattr(gen.requests, 'post', lambda *a, **k: FakeResponse(200, {'data': page}))
+    assert gen.get_repos_stars_and_forks('t', 'zaccesss') == (1, 6, 1)
 
 
 def test_stars_and_forks_are_the_raw_github_sums_across_pages(gen, monkeypatch):
