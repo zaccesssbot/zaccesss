@@ -1,4 +1,4 @@
-# weekly dependency update PRs for this repo's two ecosystems: pip for the requirements.txt
+# dependency update PRs on the 1st and 15th of each month for this repo's two ecosystems: pip for the requirements.txt
 # used by the profile scripts and GitHub Actions for the workflow action versions. Major
 # version bumps are ignored across both, since a breaking change should never land
 # automatically, matching the pattern used across the rest of the fleet.
@@ -8,7 +8,9 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 18 1,15 * *"
+      timezone: Europe/London
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -20,11 +22,20 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+    groups:
+      pip-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 18 1,15 * *"
+      timezone: Europe/London
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -36,3 +47,10 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
