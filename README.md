@@ -35,7 +35,7 @@
   <source media="(prefers-color-scheme: light)" srcset="profile/profile-light.svg?v=17">
   <img alt="Isaac Adjei's GitHub Profile" src="profile/profile.svg?v=17" width="100%">
 </picture>
-<!-- I'm keeping this SVG but muting it for now - I'll uncomment when i want to restore it later -->
+<!-- I'm keeping this SVG but muting it for now. I'll uncomment it when I want it back -->
 <!--
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="approach/approach-dark.svg">
