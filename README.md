@@ -27,7 +27,7 @@
 <!--
   Profile card rendering:
   - <picture> with prefers-color-scheme serves profile/profile-dark.svg or profile/profile-light.svg directly
-    to browser engines, ensuring light/dark mode switches reliably across every forge and device.
+    to browser engines, so light and dark mode switch reliably on every forge and device.
   - profile/profile.svg serves as the standalone adaptive fallback card (dark theme by default with embedded CSS).
 -->
 <picture>
