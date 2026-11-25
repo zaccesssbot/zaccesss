@@ -666,11 +666,11 @@ def build_svg(
         trow(Y[0],  f'isaac@adjei {header_dashes}'),
 
         info_row(Y[1],  'Host',     'Aston University'),
-        info_row(Y[2],  'Mode',     'EECS'),
-        info_row(Y[3],  'Region',   'LHR <-> BHX'),
+        info_row(Y[2],  'Region',   'LHR <-> BHX'),
+        info_row(Y[3],  'Mode',     'Electronic Engineering & Computer Science'),
         info_row(Y[4],  'Kernel',   'Sleep deprived but functional'),
-        info_row(Y[5],  'OS',       'Windows, macOS, Ubuntu, Linux'),
-        info_row(Y[6],  'IDE',      'JetBrains, VS Code, Visual/Microchip Studio'),
+        info_row(Y[5],  'OS',       'Windows, macOS, Linux (Fedora & Ubuntu)'),
+        info_row(Y[6],  'IDE',      'JetBrains, VS Code, Neovim, Visual/Microchip Studio'),
 
         blank(Y[7]),
 

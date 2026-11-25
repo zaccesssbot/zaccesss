@@ -8,6 +8,7 @@ because it is a living profile rather than a released library.
 
 ### Changed
 
+- The Mode row spells out Electronic Engineering & Computer Science and moves below Region. The OS row reads Windows, macOS, Linux (Fedora & Ubuntu) and the IDE row adds Neovim. The card images carry a new cache number (18) so GitHub shows the change straight away.
 - Every figure on the card is public only, matching the profile now that private contributions are hidden there. The stats are read with `PUBLIC_TOKEN`, a token from another account with no repository access. Repository and lines of code counts ask for public repositories only. `ACCESS_TOKEN` and `CONTRIB_TOKEN` are no longer used.
 
 ## 2026-11-03
